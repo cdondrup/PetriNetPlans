@@ -2,8 +2,8 @@
 Changelog for package pnp_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.8 (2016-07-20)
+------------------
 * prettified PNActionServer.py
 * Contributors: Marc Hanheide
 
