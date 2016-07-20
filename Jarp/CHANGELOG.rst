@@ -2,8 +2,8 @@
 Changelog for package jarp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.8 (2016-07-20)
+------------------
 * pass args on to java
 * Contributors: Marc Hanheide
 
