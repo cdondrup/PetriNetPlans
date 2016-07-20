@@ -2,6 +2,9 @@
 Changelog for package jarp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.9 (2016-07-20)
 ------------------
 * added link to jarp.sh to fit previous file structure
