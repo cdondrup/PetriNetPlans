@@ -2,8 +2,8 @@
 Changelog for package pnp_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.9 (2016-07-20)
+------------------
 * Merge pull request `#1 <https://github.com/marc-hanheide/PetriNetPlans/issues/1>`_ from marc-hanheide/master
   bringing it back in line with master branch
 * * merged upstream (resolved conflicts)
