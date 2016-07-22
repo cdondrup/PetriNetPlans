@@ -2,6 +2,9 @@
 Changelog for package tug_example_actions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.10 (2016-07-20)
 -------------------
 
