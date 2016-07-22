@@ -60,12 +60,15 @@ find_package(catkin REQUIRED COMPONENTS
    PNPLastEvent.srv
    PNPReward.srv
    PNPSetVariableValue.srv
+   PNPRegisterServer.srv
+   PNPUnregisterServer.srv
  )
 
 ## Generate actions in the 'action' folder
  add_action_files(
    FILES
    PNP.action
+   wait.action
 #   Action2.action
  )
 
