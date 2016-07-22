@@ -2,6 +2,12 @@
 Changelog for package pnp
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove source tree installation of library
+  as it break Debian builds
+* Contributors: Marc Hanheide
+
 0.0.10 (2016-07-20)
 -------------------
 
