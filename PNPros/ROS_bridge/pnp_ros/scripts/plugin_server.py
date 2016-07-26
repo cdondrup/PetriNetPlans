@@ -22,7 +22,7 @@ START = "start"
 INTERRUPT = "interrupt"
 END = "end"
 
-GH = "goal_handel"
+GH = "goal_handle"
 SN = "server_name"
 G  = "goal"
 GT = "goal_type"
