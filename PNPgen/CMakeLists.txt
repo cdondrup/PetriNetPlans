@@ -3,6 +3,12 @@ project (PNPgen)
 
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+FIND_PACKAGE(SWIG REQUIRED)
+INCLUDE(${SWIG_USE_FILE})
+
+FIND_PACKAGE(PythonLibs)
+INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+
 #search for boost
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
@@ -17,6 +23,7 @@ include_directories(${PCRE_INCLUDE_DIRS})
 #include directory with the headers of the source files
 #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
+include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/src/PRUMDP)
 
 
@@ -28,6 +35,16 @@ ADD_LIBRARY(pnpgen SHARED src/pnpgenerator.cpp)
 ADD_LIBRARY(prumdp SHARED src/PRUMDP/MDP.cpp src/PRUMDP/MDPsolve.cpp src/PRUMDP/PRUplus.cpp src/PRUMDP/PRUprint.cpp
     src/PRUMDP/PRU2MDP.cpp src/PRUMDP/PRU2MDPprogress.cpp src/PRUMDP/PRU2MDPstateStore.cpp src/PRUMDP/PRUconstraint.cpp
 )
+
+add_custom_target(create-swig-dir ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/src)
+SET(CMAKE_SWIG_FLAGS "")
+SET(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_BINARY_DIR})
+SET_SOURCE_FILES_PROPERTIES(src/pnpgenerator.i PROPERTIES CPLUSPLUS ON)
+#SET_SOURCE_FILES_PROPERTIES(src/pnpgenerator.i PROPERTIES SWIG_FLAGS "-includeall")
+SET(SWIG_MODULE_pnpgenerator_EXTRA_DEPS create-swig-dir)
+SWIG_ADD_MODULE(pnpgenerator python src/pnpgenerator.i src/pnpgenerator.cpp)
+SWIG_LINK_LIBRARIES(pnpgenerator ${PYTHON_LIBRARIES})
 
 add_executable(pnpgen_linear src/pnpgen_linear.cpp)
 add_executable(pnpgen_policy src/pnpgen_policy.cpp)
