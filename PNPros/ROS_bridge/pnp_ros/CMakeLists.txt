@@ -12,7 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS system thread)
+find_package(Boost REQUIRED COMPONENTS system thread)#
+#search for libxml2
+find_package(LibXml2 REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -102,6 +104,7 @@ include_directories(
   $ENV{PNP_INCLUDE}
   ${catkin_INCLUDE_DIRS}
   ${BOOST_INCLUDE_DIRS}
+  ${LIBXML2_INCLUDE_DIR}
 )
 link_directories($ENV{PNP_LIB})
 #message(include_var $ENV{PNP_INCLUDE})
@@ -122,6 +125,7 @@ add_dependencies(pnpros pnp_msgs_generate_messages_cpp)
 target_link_libraries(pnpros
    ${catkin_LIBRARIES}
    ${BOOST_LIBRARIES}
+   ${LIBXML2_LIBRARIES}
 )
 
 add_library(PNPAS
@@ -132,6 +136,7 @@ target_link_libraries(PNPAS
    pnpros
    ${catkin_LIBRARIES}
    ${BOOST_LIBRARIES}
+   ${LIBXML2_LIBRARIES}
 )
 
 ## Declare a cpp executable
@@ -148,6 +153,7 @@ target_link_libraries(pnp_node
    ${PNP_LIBRARY}
    ${catkin_LIBRARIES}
    ${BOOST_LIBRARIES}
+   ${LIBXML2_LIBRARIES}
 )
 
 
