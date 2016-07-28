@@ -1,0 +1,27 @@
+# - Config file for the FooBar package
+# It defines the following variables
+#  PNPGEN_INCLUDE_DIRS - include directories for FooBar
+#  PNPGEN_LIBRARIES    - libraries to link against
+#  PNPGEN_EXECUTABLE   - the bar executable
+
+@PACKAGE_INIT@
+ 
+# Compute paths
+get_filename_component(PNPGEN_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+#set(PNPGEN_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+set_and_check(PNPGEN_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@")
+ 
+# Our library dependencies (contains definitions for IMPORTED targets)
+if(NOT TARGET pnpgen AND NOT FooBar_BINARY_DIR)
+  include("${PNPGEN_CMAKE_DIR}/PNPgenTargets.cmake")
+endif()
+if(NOT TARGET prumdp AND NOT FooBar_BINARY_DIR)
+  include("${PNPGEN_CMAKE_DIR}/PNPgenTargets.cmake")
+endif()
+ 
+# These are IMPORTED targets created by FooBarTargets.cmake
+set(PNPGEN_LIBRARIES pnpgen prumdp)
+set(PNPGEN_EXECUTABLE pnpgen_linear pnpgen_policy pnpgen_condplan pnpgen_pru)
+
+check_required_components(pnpgen)
+check_required_components(prumdp)
