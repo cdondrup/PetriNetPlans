@@ -1,12 +1,13 @@
 
-#include <pnp/basic_plan/xml_plan_instantiator.h>
-#include <pnp/utils.h>
-#include <pnp/pnp_plan.h>
+#include "pnp/basic_plan/xml_plan_instantiator.h"
+#include "pnp/utils.h"
+#include "pnp/pnp_plan.h"
 
 #include <list>
 #include <iterator>
 #include <functional>
 #include <set>
+#include <iostream>
 
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
@@ -26,6 +27,23 @@ struct hideParams {
 	xmlNodePtr cur;
 };
 
+void XMLPnpPlanInstantiator::loadFromString ( const string& xml, PnpPlan* plan )
+throw ( runtime_error ) {
+
+    xmlDocPtr doc;
+
+    doc = xmlParseDoc(xmlCharStrdup(xml.c_str()));
+
+    xmlNodePtr cur = xmlDocGetRootElement(doc);
+
+    placesPnmlLookup.clear();
+    transitionsPnmlLookup.clear();
+    plan->clearAll();
+
+    plan->setPlanName(generateUUID());
+    loadPlan(doc, cur, plan);
+}
+
 void XMLPnpPlanInstantiator::loadFromPNML ( const string& filePath, PnpPlan* plan )
 throw ( runtime_error ) {
 
@@ -40,8 +58,12 @@ throw ( runtime_error ) {
 	plan->clearAll();
 
 	plan->setPlanName ( extractPlanNameFromPath ( filePath ) );
+    loadPlan(doc, cur, plan);
+}
 
-
+void XMLPnpPlanInstantiator::loadPlan(xmlDocPtr doc, xmlNodePtr cur, PnpPlan* plan)
+throw(std::runtime_error) {
+    cout << "+++ LOADING PLAN +++" << endl;
 	cur = cur->children;
 
 	while ( cur && xmlStrcmp ( cur->name, ( const xmlChar* ) "net" ) != 0 )
