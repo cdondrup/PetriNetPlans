@@ -7,17 +7,41 @@ Created on Fri Jul 22 09:42:29 2016
 
 import rospy
 import rosservice
+import socket
 from pnp_msgs.srv import PNPRegisterServer, PNPUnregisterServer
 
 
-def get_plugin_server_service_name(service_type):
+def custom_rosservice_find(service_type):
+    """
+    Lookup services by service_type. Exteing functionality of rosservice.rosservice_find
+    @param service_type: type of service to find
+    @type  service_type: str
+    @return: list of service names that use service_type    
+    @rtype: [str]
+    """
+    master = rosservice._get_master()
+    matches = []
     try:
-        return rosservice.rosservice_find(service_type)[0]
-    except IndexError:
-        if not rospy.core.is_shutdown_requested():
-            rospy.logwarn("No service found. Retrying in 1 second")
+        _, _, services = master.getSystemState()
+        for s, l in services:
+            try:
+                t = rosservice.get_service_type(s)
+            except rosservice.ROSServiceIOException as e:
+                rospy.logdebug(e)
+            else:
+                if t == service_type:
+                    matches.append(s)
+    except socket.error:
+        raise rosservice.ROSServiceIOException("Unable to communicate with master!")
+    return matches
+
+def get_plugin_server_service_name(service_type):
+    while not rospy.core.is_shutdown_requested():
+        try:
+            return custom_rosservice_find(service_type)[0]
+        except IndexError:
+            rospy.logwarn("No service found. Retrying in 1 second. Enable debug mode for more information.")
             rospy.sleep(1.)
-            return get_plugin_server_service_name(service_type)
             
 def unregister_plugin_client(name):
     s = rospy.ServiceProxy(get_plugin_server_service_name(PNPUnregisterServer._type), PNPUnregisterServer)
