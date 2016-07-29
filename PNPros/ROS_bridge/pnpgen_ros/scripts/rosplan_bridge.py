@@ -22,10 +22,12 @@ class ROSPlanBridge(object):
         
     def callback(self, msg):
         plan = ""
-        for actions in msg.plan:
-            plan += actions.name
-            for param in actions.parameters:
+        for action in msg.plan:
+            plan += action.name
+            for param in action.parameters:
                 plan += "_%s" % param.value
+            if int(action.duration) > 0.:
+                plan += "|%s" % int(action.duration)
             plan += ";"
         rospy.loginfo("Got plan '%s'" % plan[:-1])
         pnml = self.generate_pnml(plan[:-1])
