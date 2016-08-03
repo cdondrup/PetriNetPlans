@@ -31,6 +31,7 @@ S  = "server"
 
 class PNPPluginServer(object):
     def __init__(self, name):
+        rospy.loginfo("Starting %s" % name)
         self.__servers = {}
         self.__goals = {}
         self.__conditions = {"hello": True}
@@ -47,6 +48,7 @@ class PNPPluginServer(object):
                   PNPCondition,
                   self._condition_eval_cb)
         self._as.start()
+        rospy.loginfo("%s started" % name)
         
     def get_goal_type(self, action_name):
         topic_type = rostopic._get_topic_type("/%s/goal" % action_name)[0]
