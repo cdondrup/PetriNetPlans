@@ -655,10 +655,21 @@ void PNPGenerator::readERFile(const char*filename) {
     
     ifstream f(filename);
     while(getline(f,line)) {
-        if (parseERline(line,action,cond,recoveryplan))
-            executionrules.add(action,cond,recoveryplan);
+        addER(line);
     }
     f.close();
+}
+
+void PNPGenerator::addER(const string& rule) {
+
+    string action,cond,recoveryplan;
+
+    if (parseERline(rule,action,cond,recoveryplan))
+        addER(action,cond,recoveryplan);
+}
+
+void PNPGenerator::addER(const string& action, const string& cond, const string& recoveryplan) {
+    executionrules.add(action,cond,recoveryplan);
 }
 
 void PNPGenerator::applyExecutionRules() {
