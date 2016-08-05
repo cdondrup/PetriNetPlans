@@ -34,7 +34,7 @@ class PNPPluginServer(object):
         rospy.loginfo("Starting %s" % name)
         self.__servers = {}
         self.__goals = {}
-        self.__conditions = {"hello": True}
+        self.__conditions = {"hello": 1, "robot_dist_far": 1}
         self._as = ActionServer(
             name, 
             PNPAction, 
@@ -144,9 +144,15 @@ class PNPPluginServer(object):
             while self.__goals[g.id][G].get_goal_status() in (GoalStatus.ACTIVE, GoalStatus.PENDING):
                 rospy.sleep(1.)
         except KeyError as e:
-            rospy.logerr(e.message)
-        gh.set_succeeded(PNPResult(result='OK'), 'OK')
-        del self.__goals[g.id]
+            rospy.logerr(e)
+            gh.set_aborted(PNPResult(result='FAILED'), 'FAILED')
+        else:
+            gh.set_succeeded(PNPResult(result='OK'), 'OK')
+        finally:
+            try:
+                del self.__goals[g.id]
+            except KeyError as e:
+                rospy.logerr("Could not delete goal: '%s'" % e)
 
 
 if __name__ == "__main__":
