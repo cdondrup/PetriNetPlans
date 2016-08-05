@@ -239,6 +239,8 @@ public:
         
     void readERFile(const char* filename);
     void readERFile(const string& filename) { readERFile(filename.c_str()); }
+    void addER(const string& rule);
+    void addER(const string& action, const string& cond, const string& recoveryplan);
 
     Place * add_before(PNP &pnp, string b, string current_action, Place* current_place);
     Place * add_after(PNP &pnp, string b, string current_action, Place* current_place);
