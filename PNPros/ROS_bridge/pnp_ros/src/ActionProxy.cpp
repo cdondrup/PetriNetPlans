@@ -255,4 +255,23 @@ namespace pnpros
 		
 		return false;
 	}
+
+    bool ActionProxy::failed()
+    {
+        actionlib::CommState cs = goalhandler.getCommState();
+
+        //cout << "### Finishing " << name << " ? " << cs.toString()  << endl;
+
+        if (cs == actionlib::CommState::DONE)
+        {
+            actionlib::TerminalState ts = goalhandler.getTerminalState();
+
+            if (ts != actionlib::TerminalState::SUCCEEDED) {
+                ROS_DEBUG_STREAM("Failed: " << robotname << " " << name << " " << params << " - ID: " << id << " - " << ts.toString() << " " << ts.getText());
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

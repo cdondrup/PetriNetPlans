@@ -48,5 +48,6 @@ namespace pnpros
 			virtual void interrupt();
 			virtual void end();
 			virtual bool finished();
+            virtual bool failed();
 	};
 }
