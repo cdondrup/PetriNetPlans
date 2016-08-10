@@ -153,27 +153,6 @@ template<typename PnpPlaceClass, typename PnpTransitionClass>
 void PnpPlanTemplate<PnpPlaceClass, PnpTransitionClass>::executeStep()
 {
 	PNP_OUT("\nEXECUTESTEP of plan '"<<getPlanName()<<"'");
-
-	if (isInGoalState())
-	{
-		std::map<std::string,std::string>::iterator it = activePlaces.find(getPlanName());
-		
-		if (it != activePlaces.end()) activePlaces.erase(it);
-		
-		PNP_OUT("Goal reached!");
-		
-		return;
-	}
-	else if (isInFailState())
-	{
-		std::map<std::string,std::string>::iterator it = activePlaces.find(getPlanName());
-		
-		if (it != activePlaces.end()) activePlaces.erase(it);
-		
-		PNP_OUT("Plan failed");
-		
-		return;
-	}
 	
 	std::map<std::string,std::string>::iterator it = activePlaces.find(getPlanName());
 	
@@ -192,13 +171,27 @@ void PnpPlanTemplate<PnpPlaceClass, PnpTransitionClass>::executeStep()
 	activePlaces.insert(make_pair(getPlanName(),places));
 	
 	#if PNP_OUTPUT_ENABLED
-	std::set<PnpPlace*> nepForTest2 = this->getNonEmptyPlaces();
+	std::set<PnpPlace*> nepForTest = this->getNonEmptyPlaces();
 	PNP_OUT("Current active places:");
 	
-	for (std::set<PnpPlace*>::iterator it = nepForTest2.begin(); it != nepForTest2.end(); ++it) {
+	for (std::set<PnpPlace*>::iterator it = nepForTest.begin(); it != nepForTest.end(); ++it) {
 		PNP_OUT("  " << (*it)->nodeId << " \"" << (*it)->pnmlString << "\"");
 	}
 	#endif
+
+	if (isInGoalState())
+	{
+		PNP_OUT("Goal reached!");
+
+		return;
+	}
+	else if (isInFailState())
+	{
+
+		PNP_OUT("Plan failed");
+
+		return;
+	}
 
 	executeAllActiveActions();
 
