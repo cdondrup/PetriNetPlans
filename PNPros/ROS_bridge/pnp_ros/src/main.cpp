@@ -247,7 +247,7 @@ int main(int argc, char** argv)
 				
 				cout << "Starting " << executor->getMainPlanName() << endl;
 				
-				while (!executor->goalReached() && ros::ok() && planToExec=="")
+				while (!executor->goalReached() && !executor->planFailed() && ros::ok() && planToExec=="")
 				{
 					executor->execMainPlanStep();
 				  
@@ -275,8 +275,16 @@ int main(int argc, char** argv)
                     if (!autorestart)
                       planToExec="stop";
 				}
+				else if (executor->planFailed()) {
+				    cout << "PLAN FAILED!!!" << endl;
+				    String activePlaces;
+				    activePlaces.data = "fail";
+				    currentActivePlacesPublisher.publish(activePlaces);
+				    if (!autorestart)
+				       planToExec="stop";
+				}
 				else {
-				    cout << "PLAN STOPPED OR CHANGED!!!" << endl;
+				     cout << "PLAN STOPPED OR CHANGED!!!" << endl;
 				    String activePlaces;
 				    activePlaces.data = "abort";
 				    currentActivePlacesPublisher.publish(activePlaces);			    
