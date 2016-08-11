@@ -7,17 +7,19 @@ project(pnpgen_ros)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
-  pnp_msgs
+  message_generation
+  message_runtime
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(PNPgen REQUIRED)
 message("PNPgen dirs:" ${PNPGEN_INCLUDE_DIRS})
+find_package(Boost REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+catkin_python_setup()
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -44,18 +46,20 @@ message("PNPgen dirs:" ${PNPGEN_INCLUDE_DIRS})
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  PNPAction.msg
+  PNPActionArray.msg
+  PNPExecutionRule.msg
+  PNPExecutionRuleArray.msg
+  Plan.msg
+)
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  PNPGeneratePlan.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -65,10 +69,10 @@ message("PNPgen dirs:" ${PNPGEN_INCLUDE_DIRS})
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -114,8 +118,10 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
   ${PNPGEN_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIR}
 )
 
 ## Declare a C++ library
@@ -129,16 +135,17 @@ include_directories(
 # add_dependencies(pnpgen_ros ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(pnpgen_ros_node src/pnpgen_linear.cpp)
+add_executable(pnpgen_server src/pnpgen.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(pnpgen_ros_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(pnpgen_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(pnpgen_ros_node
+target_link_libraries(pnpgen_server
   ${catkin_LIBRARIES}
   ${PNPGEN_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 
 #############
@@ -156,7 +163,7 @@ target_link_libraries(pnpgen_ros_node
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS pnpgen_ros pnpgen_ros_node
+# install(TARGETS pnpgen_ros pnpgen_server
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

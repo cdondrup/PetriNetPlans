@@ -62,7 +62,6 @@ find_package(catkin REQUIRED COMPONENTS
    PNPSetVariableValue.srv
    PNPRegisterServer.srv
    PNPUnregisterServer.srv
-   PNPGeneratePlan.srv
  )
 
 ## Generate actions in the 'action' folder
