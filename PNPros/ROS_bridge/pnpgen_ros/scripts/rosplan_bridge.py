@@ -7,44 +7,37 @@ Created on Thu Jul 28 11:06:58 2016
 """
 
 import rospy
-from std_msgs.msg import String
-from rosplan_dispatch_msgs.msg import CompletePlan
-from pnp_msgs.srv import PNPGeneratePlan, PNPGeneratePlanRequest
+from pnpgen_ros.pnp_bridge_abstractclass import PNPBridgeAbstractclass
 
 
-class ROSPlanBridge(object):
+class ROSPlanBridge(PNPBridgeAbstractclass):
     def __init__(self, name):
         rospy.loginfo("Starting '%s'." % name)
-        self.pub = rospy.Publisher("/planToExec", String, queue_size=10, latch=False)
-        rospy.sleep(0.5)
-        rospy.Subscriber("/kcl_rosplan/plan", CompletePlan, self.callback)
+        super(ROSPlanBridge, self).__init__("/kcl_rosplan/plan")
         rospy.loginfo("Done.")
-        
-    def callback(self, msg):
-        plan = ""
-        for action in msg.plan:
-            plan += action.name
-            for param in action.parameters:
-                plan += "_%s" % param.value
-            if int(action.duration) > 0.:
-                plan += "|%s" % int(action.duration)
-            plan += ";"
-        rospy.loginfo("Got plan '%s'" % plan[:-1])
-        pnml = self.generate_pnml(plan[:-1])
-        rospy.loginfo("Sending pnml")
-        self.pub.publish(pnml)
-        print "published"
 
-    def generate_pnml(self, plan):
-        s = rospy.ServiceProxy("/pnpgen_linear/generate_plan", PNPGeneratePlan)
-        try:            
-            s.wait_for_service(timeout=1.)
-            return s(PNPGeneratePlanRequest(plan=plan)).pnml
-        except rospy.ROSException:
-            if not rospy.is_shutdown():
-                rospy.logwarn("Unable to generate PNML, retrying.")          
-                return self.generate_pnml(plan)
-        
+    def parse_plan_msg(self, msg):
+        plan = self.new_plan()
+        for action in msg.plan:
+            plan.actions.append(
+                self.new_concurrent_action_list(
+                    actions=[self.new_action(
+                        name=action.name,
+                        duration=int(action.duration),
+                        parameters=[str(param.value) for param in action.parameters]
+                    ),self.new_action(
+                        name=action.name,
+                        duration=2,
+                        parameters=["spam"]
+                    ), self.new_action(
+                        name=action.name,
+                        duration=4,
+                        parameters=["eggs"]
+                    )]
+                )
+            )
+        return plan
+
 if __name__ == "__main__":
     rospy.init_node("rosplan_bridge")
     ROSPlanBridge(rospy.get_name())
