@@ -204,10 +204,6 @@ private:
     stack< pair<string, Place*> > ASS;  // action, Place* map - stack of actions to be analized for applying the social rules
     stack< pair<string, Place*> > ASE;  // action, Place* map - stack of actions to be analized for applying the execution rules
 
-    void addActionToStacks(string a, Place *p) {
-        ASS.push(make_pair(a,p)); ASE.push(make_pair(a,p));
-    }
-    
     bool parseERline(const string line, string &action, string &cond, string &plan);
 
 public:
@@ -253,6 +249,10 @@ public:
     vector<Place*> addSensingAction(string action, Place *place, vector<string> outcomes) {
         addActionToStacks(action,place);
         return pnp.addSensingAction(action,place,outcomes);
+    }
+    
+    void addActionToStacks(string a, Place *p) {
+        ASS.push(make_pair(a,p)); ASE.push(make_pair(a,p));
     }
 
     void save(const char* filename=NULL); // if NULL it uses the name of the plan as file name
