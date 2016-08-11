@@ -105,7 +105,7 @@ class PNPPluginServer(object):
             self.__goals[g.id] = {GH: gh, SN: g.name}
             print self.__goals
             t.start()
-        elif g.function in (INTERRUPT, ): # END): END is being irgnored due to inconsistent IDs
+        elif g.function in (INTERRUPT, END):
             gh.set_accepted()
             self._cancel(gh)
         else:
@@ -119,17 +119,15 @@ class PNPPluginServer(object):
     def _cancel(self, gh):
         g = gh.get_goal()
         if g.id in self.__goals:
+            if gh.status_tracker.status.status in (GoalStatus.ACTIVE, GoalStatus.PENDING):
+                try:                    
+                    self.__goals[g.id][G].cancel()
+                except KeyError as e:
+                    rospy.logerr(e)
             if g.function == INTERRUPT:
-                if gh.status_tracker.status.status in (GoalStatus.ACTIVE, GoalStatus.PENDING):
-                    try:                    
-                        self.__goals[g.id][G].cancel()
-                    except KeyError as e:
-                        rospy.logerr(e)
-                    self.__goals[g.id][GH].set_canceled(PNPResult(result='INTERRUPTED'), 'INTERRUPTED')
+                self.__goals[g.id][GH].set_succeeded(PNPResult(result='INTERRUPTED'), 'INTERRUPTED')
             else:
                 self.__goals[g.id][GH].set_succeeded(PNPResult(result='OK'), 'OK')
-            
-            del self.__goals[g.id]
     
     def _execute(self, gh):
         g = gh.get_goal()
@@ -144,15 +142,17 @@ class PNPPluginServer(object):
             while self.__goals[g.id][G].get_goal_status() in (GoalStatus.ACTIVE, GoalStatus.PENDING):
                 rospy.sleep(1.)
         except KeyError as e:
-            rospy.logerr(e)
-            gh.set_aborted(PNPResult(result='FAILED'), 'FAILED')
+            rospy.logerr("No action with name: %s found." % e)
+            if gh.status_tracker.status.status in (GoalStatus.ACTIVE, GoalStatus.PENDING):
+                gh.set_aborted(PNPResult(result='FAILED'), 'FAILED')
         else:
-            gh.set_succeeded(PNPResult(result='OK'), 'OK')
+            if gh.status_tracker.status.status in (GoalStatus.ACTIVE, GoalStatus.PENDING):
+                gh.set_succeeded(PNPResult(result='OK'), 'OK')
         finally:
             try:
                 del self.__goals[g.id]
             except KeyError as e:
-                rospy.logerr("Could not delete goal: '%s'" % e)
+                pass
 
 
 if __name__ == "__main__":
