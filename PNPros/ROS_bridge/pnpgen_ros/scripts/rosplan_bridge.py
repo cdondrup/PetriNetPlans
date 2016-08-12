@@ -20,22 +20,35 @@ class ROSPlanBridge(PNPBridgeAbstractclass):
         plan = self.new_plan()
         for action in msg.plan:
             plan.actions.append(
-                self.new_concurrent_action_list(
+                self.new_action_list(
                     actions=[self.new_action(
                         name=action.name,
                         duration=int(action.duration),
                         parameters=[str(param.value) for param in action.parameters]
-                    ),self.new_action(
-                        name=action.name,
-                        duration=2,
-                        parameters=["spam"]
-                    ), self.new_action(
-                        name=action.name,
-                        duration=4,
-                        parameters=["eggs"]
                     )]
+#                    ,self.new_action(
+#                        name=action.name,
+#                        duration=2,
+#                        parameters=["spam"]
+#                    ), self.new_action(
+#                        name=action.name,
+#                        duration=4,
+#                        parameters=["eggs"]
+#                    )]
                 )
             )
+        plan.execution_rules = self.new_execution_rule_list(
+            rules=self.new_execution_rule(
+                timing=self.AFTER,
+                action_name="goto",
+                condition="(not spam)",
+                recovery=self.new_action_list(actions=self.new_action(
+                    name="fail_plan",
+                    duration=0,
+                    parameters="foo"
+                ))
+            )
+        )
         return plan
 
 if __name__ == "__main__":

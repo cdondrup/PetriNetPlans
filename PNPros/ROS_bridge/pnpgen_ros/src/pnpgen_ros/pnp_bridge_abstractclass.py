@@ -16,6 +16,8 @@ from pnpgen_ros.msg import Plan, PNPAction, PNPActionArray, PNPExecutionRule, PN
 class PNPBridgeAbstractclass(object):
     __metaclass__ = ABCMeta
 
+    BEFORE, DURING, AFTER = range(3)
+
     def __init__(self, plan_topic):
         self.pub = rospy.Publisher("/planToExec", String, queue_size=10, latch=False)
         rospy.loginfo("Waiting for topic: %s" % plan_topic)
@@ -50,7 +52,7 @@ class PNPBridgeAbstractclass(object):
             execution_rules=execution_rules
         )
 
-    def new_concurrent_action_list(self, actions=None):
+    def new_action_list(self, actions=None):
         if actions != None:
             if not isinstance(actions, list):
                 actions = [actions]
@@ -69,7 +71,7 @@ class PNPBridgeAbstractclass(object):
         if not isinstance(duration, int):
             raise TypeError("'duration' has to be a int")
         if not isinstance(parameters, list):
-            raise TypeError("'parameters' has to be a list")
+            parameters = [parameters]
         for p in parameters:
             if not isinstance(p, str):
                 raise TypeError("'parameters' has to be a list of strings")
@@ -79,6 +81,37 @@ class PNPBridgeAbstractclass(object):
             parameters=parameters
         )
 
+    def new_execution_rule_list(self, rules=None):
+        if rules != None:
+            if not isinstance(rules, list):
+                rules = [rules]
+            for a in rules:
+                if not isinstance(a, PNPExecutionRule):
+                    raise TypeError("'rules' has to be of type '%s' or '[%s]'" % (PNPExecutionRule,PNPExecutionRule))
+        else:
+            rules = []
+        return PNPExecutionRuleArray(
+            pnp_execution_rule_array=rules
+        )
+
+    def new_execution_rule(self, timing, action_name, condition, recovery):
+        if not isinstance(timing, int):
+            raise TypeError("'timing' has to be an int")
+        if not isinstance(action_name, str):
+            raise TypeError("'action_name' has to be a string")
+        if not isinstance(condition, str):
+            raise TypeError("'condition' has to be a string")
+        if not isinstance(recovery, PNPActionArray):
+            raise TypeError("'recovery' has to be a PNPActionArray")
+        for r in recovery.pnp_action_array:
+            if not isinstance(r, PNPAction):
+                raise TypeError("'recovery' has to be a list of PNPAction")
+        return PNPExecutionRule(
+            timing=timing,
+            action_name=action_name,
+            condition=condition,
+            recovery=recovery
+        )
 
     def _check_msg_type(self, msg):
         if not isinstance(msg, Plan):
