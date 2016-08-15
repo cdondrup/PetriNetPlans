@@ -49,6 +49,8 @@ namespace pnpgen_ros {
                     y-=3;
                 }
                 
+                Place *start = p; // Save starting place for possible recovery
+                
                 /***********************************************************************************************************
                  Recovery behaviours to be executed before an action has been started.
                 ************************************************************************************************************/
@@ -61,43 +63,40 @@ namespace pnpgen_ros {
                         // Add a sensing action with two outcomes: user specified | 'not' user specified
                         std::vector<Place*> res = addBinarySensingAction("before"+num_to_str<int>(cnt)+action->name, er->condition, p);
                         p = res[0]; // Success place
-                        // Error handling of specific keywords
-                        if(er->recovery.pnp_action_array[0].name == "fail_plan") {
-                            res[1]->setName("fail");
-                        } else if(er->recovery.pnp_action_array[0].name == "restart_action"){
-                            ROS_WARN("Restarting an action before it has been started is not supported. No recovery added.");
-                        } else if(er->recovery.pnp_action_array[0].name == "restart_plan"){
-                            Transition *t = pnpgen->pnp.addTransition("[]"); t->setX(res[1]->getX()+1); t->setY(res[1]->getY());
-                            pnpgen->pnp.connect(res[1], t); pnpgen->pnp.connect(t, pnpgen->pnp.pinit);
-                        } else if(er->recovery.pnp_action_array[0].name == "skip_action"){
-                            Transition *t = pnpgen->pnp.addTransition("[]"); t->setX(res[1]->getX()+1); t->setY(res[1]->getY());
-                            skip.push_back(t);
-                        } else { // Custom recovery plan
-                            Place *re_p = res[1];
-                            re_p->setX(p->getX()); re_p->setY(re_p->getY()+y);
-                            for(std::vector<PNPAction>::const_iterator re = er->recovery.pnp_action_array.begin();
-                                re != er->recovery.pnp_action_array.end(); ++re) {
+                        Place *re_p = res[1]; re_p->setX(start->getX()); re_p->setY(re_p->getY()+y);
+                        for(std::vector<PNPAction>::const_iterator re = er->recovery.pnp_action_array.begin();
+                            re != er->recovery.pnp_action_array.end(); ++re) {
+                            // Error handling of specific keywords
+                            if(re->name == "fail_plan") {
+                                re_p->setName("fail");
+                            } else if(re->name == "restart_action"){
+                                Transition *t = pnpgen->pnp.addTransition("[]"); t->setX(re_p->getX()+1); t->setY(re_p->getY());
+                                pnpgen->pnp.connect(re_p, t); pnpgen->pnp.connect(t, start);
+                            } else if(re->name == "start_action"){
+                                Transition *t = pnpgen->pnp.addTransition("[]"); t->setX(re_p->getX()+1); t->setY(re_p->getY());
+                                pnpgen->pnp.connect(re_p, t); pnpgen->pnp.connect(t, res[0]);
+                            } else if(re->name == "restart_plan"){
+                                Transition *t = pnpgen->pnp.addTransition("[]"); t->setX(re_p->getX()+1); t->setY(re_p->getY());
+                                pnpgen->pnp.connect(re_p, t); pnpgen->pnp.connect(t, pnpgen->pnp.pinit);
+                            } else if(re->name == "skip_action"){
+                                Transition *t = pnpgen->pnp.addTransition("[]"); t->setX(re_p->getX()+1); t->setY(re_p->getY());
+                                pnpgen->pnp.connect(re_p, t); skip.push_back(t);
+                            } else { // Custom recovery plan
                                 // Add recovery action: timed or normal
                                 cout << "Adding custom recovery action" << endl;
                                 re_p = addAction(*re, re_p);
                             }
-                            Transition *t2 = pnpgen->pnp.addTransition("[]"); t2->setX(re_p->getX()+1); t2->setY(re_p->getY());
-                            pnpgen->pnp.connect(re_p, t2); pnpgen->pnp.connect(t2, p);
                         }
-                    y += 4; cnt++;
+                        cnt++;
                     }
+                    y += 4;
                 }
                 /***********************************************************************************************************/
                 
                 /***********************************************************************************************************
                  Add action: timed or normal
                 ************************************************************************************************************/
-                Place *start = p; // Save starting place for possible recovery
                 p = addAction(*action, p);
-                // Handel skipping the action
-                for(std::vector<Transition*>::const_iterator s = skip.begin(); s != skip.end(); ++s) {
-                    pnpgen->pnp.connect(*s, p);
-                }
                 /***********************************************************************************************************/
                 
                 /***********************************************************************************************************
@@ -110,33 +109,37 @@ namespace pnpgen_ros {
                         // Add a sensing action with two outcomes: user specified | 'not' user specified
                         std::vector<Place*> res = addBinarySensingAction("after"+num_to_str<int>(cnt)+action->name, er->condition, p);
                         p = res[0]; // Success place
-                        // Error handling of specific keywords
-                        if(er->recovery.pnp_action_array[0].name == "fail_plan") {
-                            res[1]->setName("fail");
-                        } else if(er->recovery.pnp_action_array[0].name == "restart_action"){
-                            Transition *t = pnpgen->pnp.addTransition("[]"); t->setX(res[1]->getX()+1); t->setY(res[1]->getY());
-                            pnpgen->pnp.connect(res[1], t); pnpgen->pnp.connect(t, start);
-                        } else if(er->recovery.pnp_action_array[0].name == "restart_plan"){
-                            Transition *t = pnpgen->pnp.addTransition("[]"); t->setX(res[1]->getX()+1); t->setY(res[1]->getY());
-                            pnpgen->pnp.connect(res[1], t); pnpgen->pnp.connect(t, pnpgen->pnp.pinit);
-                        } else if(er->recovery.pnp_action_array[0].name == "skip_action"){
-                            ROS_WARN("Skipping an action after it has been completed is not supported. No recovery added.");
-                        } else { // Custom recovery plan
-                            Place *re_p = res[1];
-                            re_p->setX(start->getX()); re_p->setY(re_p->getY()+y);
-                            for(std::vector<PNPAction>::const_iterator re = er->recovery.pnp_action_array.begin();
-                                re != er->recovery.pnp_action_array.end(); ++re) {
+                        Place *re_p = res[1]; re_p->setX(start->getX()); re_p->setY(re_p->getY()+y);
+                        for(std::vector<PNPAction>::const_iterator re = er->recovery.pnp_action_array.begin();
+                            re != er->recovery.pnp_action_array.end(); ++re) {
+                            // Error handling of specific keywords
+                            if(re->name == "fail_plan") {
+                                re_p->setName("fail");
+                            } else if(re->name == "restart_action"){
+                                Transition *t = pnpgen->pnp.addTransition("[]"); t->setX(re_p->getX()+1); t->setY(re_p->getY());
+                                pnpgen->pnp.connect(re_p, t); pnpgen->pnp.connect(t, start);
+                            } else if(re->name == "restart_plan"){
+                                Transition *t = pnpgen->pnp.addTransition("[]"); t->setX(re_p->getX()+1); t->setY(re_p->getY());
+                                pnpgen->pnp.connect(re_p, t); pnpgen->pnp.connect(t, pnpgen->pnp.pinit);
+                            } else if(re->name == "skip_action"){
+                                Transition *t = pnpgen->pnp.addTransition("[]"); t->setX(re_p->getX()+1); t->setY(re_p->getY());
+                                pnpgen->pnp.connect(re_p, t); pnpgen->pnp.connect(t, p);
+                            } else { // Custom recovery plan
                                 // Add recovery action: timed or normal
                                 cout << "Adding custom recovery action" << endl;
                                 re_p = addAction(*re, re_p);
                             }
-                            Transition *t2 = pnpgen->pnp.addTransition("[]"); t2->setX(re_p->getX()+1); t2->setY(re_p->getY());
-                            pnpgen->pnp.connect(re_p, t2); pnpgen->pnp.connect(t2, p);
                         }
-                    y += 4; cnt++;
+                        cnt++;
                     }
+                    y += 4;
                 }
                 /***********************************************************************************************************/
+                
+                // Handel skipping the action
+                for(std::vector<Transition*>::const_iterator s = skip.begin(); s != skip.end(); ++s) {
+                    pnpgen->pnp.connect(*s, p);
+                }
                 
                 // Connect end place with join transition in case of multiple concurrent actions
                 if(it->pnp_action_array.size() > 1) {
@@ -158,24 +161,27 @@ namespace pnpgen_ros {
         // Apply during execution rules
         for(std::vector<PNPExecutionRule>::const_iterator du = rest.begin(); du != rest.end(); ++du) {
             std:: string recovery = "";
-            if(du->recovery.pnp_action_array[0].name == "fail_plan"
-                    || du->recovery.pnp_action_array[0].name == "restart_plan"
-                    || du->recovery.pnp_action_array[0].name == "restart_action"
-                    || du->recovery.pnp_action_array[0].name == "skip_action") {
-                recovery = du->recovery.pnp_action_array[0].name + " ";
-            } else {
-                for(std::vector<PNPAction>::const_iterator a = du->recovery.pnp_action_array.begin(); 
-                    a != du->recovery.pnp_action_array.end(); ++a) {
+            
+            for(std::vector<PNPAction>::const_iterator a = du->recovery.pnp_action_array.begin(); 
+                a != du->recovery.pnp_action_array.end(); ++a) {
+                if(a->name == "fail_plan"
+                        || a->name == "restart_plan"
+                        || a->name == "restart_action"
+                        || a->name == "skip_action") {
+                    recovery += a->name;
+                } else {
                     recovery += generateActionName(a->name, a->parameters);
                     if(a->duration > 0)
                         recovery += "|" + num_to_str<int>(a->duration);
-                    recovery += ";";
                 }
+                recovery += ";";
             }
             cout << "Adding execution rule: " << du->action_name << " " << du->condition << " " << recovery.substr(0, recovery.size()-1) << endl;
             pnpgen->addER(du->action_name, du->condition, recovery.substr(0, recovery.size()-1));
         }
         pnpgen->applyExecutionRules();
+        
+        cout << "+++ " << pnpgen->pnp.stats() << endl;
     
         // return the PNP
         stringstream ss;
