@@ -247,10 +247,11 @@ namespace pnpros
 		if (cs == actionlib::CommState::DONE)
 		{
 			actionlib::TerminalState ts = goalhandler.getTerminalState();
-			
-            ROS_DEBUG_STREAM("Finish: " << robotname << " " << name << " " << params << " - ID: " << id << " - " << ts.toString() << " " << ts.getText());
 							
-			if (ts == actionlib::TerminalState::SUCCEEDED)  return true;
+            if (ts == actionlib::TerminalState::SUCCEEDED) {
+                ROS_INFO_STREAM("Finish: " << robotname << " " << name << " " << params << " - ID: " << id << " - " << ts.toString() << " " << ts.getText());
+                return true;
+            }
 		}
 		
 		return false;
@@ -266,8 +267,8 @@ namespace pnpros
         {
             actionlib::TerminalState ts = goalhandler.getTerminalState();
 
-            if (ts != actionlib::TerminalState::SUCCEEDED) {
-                ROS_DEBUG_STREAM("Failed: " << robotname << " " << name << " " << params << " - ID: " << id << " - " << ts.toString() << " " << ts.getText());
+            if (ts != actionlib::TerminalState::SUCCEEDED && ts != actionlib::TerminalState::PREEMPTED) {
+                ROS_INFO_STREAM("Failed: " << robotname << " " << name << " " << params << " - ID: " << id << " - " << ts.toString() << " " << ts.getText());
                 return true;
             }
         }
