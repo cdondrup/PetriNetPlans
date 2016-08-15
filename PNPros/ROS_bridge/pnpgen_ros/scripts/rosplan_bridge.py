@@ -51,28 +51,30 @@ class ROSPlanBridge(PNPBridgeAbstractclass):
                     name="goto",
                     duration=5,
                     parameters="bar"
-                )
+                ), self.skip_action()
                 ])
             ),
             self.new_execution_rule(
                 timing=self.AFTER,
                 action_name="goto",
                 condition="spam",
-                recovery=self.new_action_list(actions=self.new_action(
+                recovery=self.new_action_list(actions=[self.new_action(
                     name="goto",
                     duration=10,
                     parameters="bar"
-                ))
+                ),self.restart_action()
+                ])
             ),
             self.new_execution_rule(
                 timing=self.DURING,
                 action_name="goto",
                 condition="action_failed",
-                recovery=self.new_action_list(actions=self.new_action(
-                    name="restart_action",
-                    duration=10,
+                recovery=self.new_action_list(actions=[self.new_action(
+                    name="goto",
+                    duration=0,
                     parameters="bar"
-                ))
+                ),self.restart_action()
+                ])
             )
             ]
         )

@@ -24,6 +24,13 @@ class PNPBridgeAbstractclass(object):
         t = rostopic.get_topic_class(plan_topic, True)[0]
         rospy.loginfo("Got topic: %s" % plan_topic)
         rospy.sleep(0.1)
+
+        self.restart_action = lambda:self.new_action("restart_action")
+        self.start_action = lambda:self.new_action("start_action")
+        self.skip_action = lambda:self.new_action("skip_action")
+        self.restart_plan = lambda:self.new_action("restart_plan")
+        self.fail_plan = lambda:self.new_action("fail_plan")
+
         rospy.Subscriber(plan_topic, t, self._callback)
 
     @abstractmethod
@@ -65,16 +72,19 @@ class PNPBridgeAbstractclass(object):
             pnp_action_array=actions
         )
 
-    def new_action(self, name, duration, parameters):
+    def new_action(self, name, duration=0, parameters=None):
         if not isinstance(name, str):
             raise TypeError("'name' has to be a string")
         if not isinstance(duration, int):
             raise TypeError("'duration' has to be a int")
-        if not isinstance(parameters, list):
-            parameters = [parameters]
-        for p in parameters:
-            if not isinstance(p, str):
-                raise TypeError("'parameters' has to be a list of strings")
+        if parameters != None:
+            if not isinstance(parameters, list):
+                parameters = [parameters]
+            for p in parameters:
+                if not isinstance(p, str):
+                    raise TypeError("'parameters' has to be a list of strings")
+        else:
+            parameters = []
         return PNPAction(
             name=name,
             duration=duration,
