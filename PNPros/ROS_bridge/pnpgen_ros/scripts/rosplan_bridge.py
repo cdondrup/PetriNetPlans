@@ -38,16 +38,43 @@ class ROSPlanBridge(PNPBridgeAbstractclass):
                 )
             )
         plan.execution_rules = self.new_execution_rule_list(
-            rules=self.new_execution_rule(
-                timing=self.AFTER,
+            rules=[self.new_execution_rule(
+                timing=self.BEFORE,
                 action_name="goto",
                 condition="(not spam)",
-                recovery=self.new_action_list(actions=self.new_action(
-                    name="fail_plan",
-                    duration=0,
+                recovery=self.new_action_list(actions=[self.new_action(
+                    name="goto",
+                    duration=2,
                     parameters="foo"
+                ),
+                self.new_action(
+                    name="goto",
+                    duration=5,
+                    parameters="bar"
+                )
+                ])
+            ),
+            self.new_execution_rule(
+                timing=self.AFTER,
+                action_name="goto",
+                condition="spam",
+                recovery=self.new_action_list(actions=self.new_action(
+                    name="goto",
+                    duration=10,
+                    parameters="bar"
+                ))
+            ),
+            self.new_execution_rule(
+                timing=self.DURING,
+                action_name="goto",
+                condition="action_failed",
+                recovery=self.new_action_list(actions=self.new_action(
+                    name="restart_action",
+                    duration=10,
+                    parameters="bar"
                 ))
             )
+            ]
         )
         return plan
 

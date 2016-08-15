@@ -34,12 +34,12 @@ class PNPPluginServer(object):
         rospy.loginfo("Starting %s" % name)
         self.__servers = {}
         self.__goals = {}
-        self.__conditions = {"hello": 1, "robot_dist_far": 1}
+        self.__conditions = {"hello": 1, "spam": 1}
         self._as = ActionServer(
-            name, 
-            PNPAction, 
-            goal_cb=self._goal_cb, 
-            cancel_cb=None, 
+            name,
+            PNPAction,
+            goal_cb=self._goal_cb,
+            cancel_cb=None,
             auto_start=False
         )
         rospy.Service("~register_server", PNPRegisterServer, self.__register_callback)
@@ -49,19 +49,19 @@ class PNPPluginServer(object):
                   self._condition_eval_cb)
         self._as.start()
         rospy.loginfo("%s started" % name)
-        
+
     def get_goal_type(self, action_name):
         topic_type = rostopic._get_topic_type("/%s/goal" % action_name)[0]
         # remove "Action" string from goal type
         assert("Action" in topic_type)
         return roslib.message.get_message_class(topic_type.replace('Action',''))
-        
+
     def get_action_type(self, action_name):
         topic_type = rostopic._get_topic_type("/%s/goal" % action_name)[0]
         # remove "Goal" string from action type
         assert("Goal" in topic_type)
         return roslib.message.get_message_class(topic_type.replace('Goal',''))
-        
+
     def _condition_eval_cb(self, req):
         print "+++++++++", req
         try:
@@ -85,7 +85,7 @@ class PNPPluginServer(object):
         else:
             rospy.logwarn("'%s' already registered. Won't do anything." % name)
             return PNPRegisterServerResponse(False)
-        
+
     def __unregister_callback(self, req):
         name = req.action_name.replace('/','')
         rospy.loginfo("Unregistering '%s' action server" % name)
@@ -96,7 +96,7 @@ class PNPPluginServer(object):
         else:
             rospy.logwarn("'%s' not registered. Won't do anything." % name)
             return PNPUnregisterServerResponse(False)
-        
+
     def _goal_cb(self, gh):
         g = gh.get_goal()
         if g.function == START:
@@ -111,24 +111,27 @@ class PNPPluginServer(object):
         else:
             rospy.logwarn("Unknown function: '%s'." % g.function)
             gh.set_rejected(PNPResult(result='REJECTED'), 'REJECTED')
-            
+
     def feedback_cb(self, gh, feedback, parent_gh):
         parent_gh.publish_feedback(feedback=PNPFeedback(feedback.__str__()))
 #        print feedback
-    
+
     def _cancel(self, gh):
+        print "####### CANCEL"
         g = gh.get_goal()
         if g.id in self.__goals:
             if gh.status_tracker.status.status in (GoalStatus.ACTIVE, GoalStatus.PENDING):
-                try:                    
+                try:
                     self.__goals[g.id][G].cancel()
                 except KeyError as e:
                     rospy.logerr(e)
             if g.function == INTERRUPT:
-                self.__goals[g.id][GH].set_succeeded(PNPResult(result='INTERRUPTED'), 'INTERRUPTED')
+                print "Interrupting:", g.id
+                self.__goals[g.id][GH].set_preempted(PNPResult(result='INTERRUPTED'), 'INTERRUPTED')
             else:
+                print "Ending:", g.id
                 self.__goals[g.id][GH].set_succeeded(PNPResult(result='OK'), 'OK')
-    
+
     def _execute(self, gh):
         g = gh.get_goal()
         rospy.loginfo("Executing: %s" % g)
@@ -144,9 +147,11 @@ class PNPPluginServer(object):
         except KeyError as e:
             rospy.logerr("No action with name: %s found." % e)
             if gh.status_tracker.status.status in (GoalStatus.ACTIVE, GoalStatus.PENDING):
-                gh.set_aborted(PNPResult(result='FAILED'), 'FAILED')
+                print "Set failed:", gh
+                gh.set_succeeded(PNPResult(result='FAILED'), 'FAILED')
         else:
             if gh.status_tracker.status.status in (GoalStatus.ACTIVE, GoalStatus.PENDING):
+                print "Set suceeded:", gh
                 gh.set_succeeded(PNPResult(result='OK'), 'OK')
         finally:
             try:
