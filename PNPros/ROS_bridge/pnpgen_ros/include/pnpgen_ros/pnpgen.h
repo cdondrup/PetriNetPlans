@@ -15,9 +15,25 @@ namespace pnpgen_ros {
         PNPGenServer();
         std::string createPNPFromLinearPlan(const Plan &plan);
         bool callback(pnpgen_ros::PNPGeneratePlan::Request  &req, pnpgen_ros::PNPGeneratePlan::Response &res);
-        Place *addAction(std::string name, Place *p, int duration=0);
+        Place *addAction(PNPAction action, Place *p);
         
     private:
+        inline std::string generateActionName(std::string name, std::vector<std::string> parameters) {
+            for(std::vector<std::string>::const_iterator param = parameters.begin();
+                param != parameters.end(); ++param) {
+                // Create param string
+                name += "_"+(*param);
+            }
+            return name;
+        }
+        
+        inline std::vector<Place*> addBinarySensingAction(std::string name, std::string condition, Place* p) {
+            std::vector<std::string> o;
+            o.push_back(condition);
+            o.push_back("(not "+condition+")");
+            return pnpgen->addSensingAction(name, p, o);
+        }
+
         inline std::string generateUUID() {
             return num_to_str<boost::uuids::uuid>(boost::uuids::random_generator()());
         }
