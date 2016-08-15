@@ -8,13 +8,19 @@ Created on Thu Jul 28 11:06:58 2016
 
 import rospy
 from pnpgen_ros.pnp_bridge_abstractclass import PNPBridgeAbstractclass
+from rosplan_dispatch_msgs.msg import CompletePlan
 
 
 class ROSPlanBridge(PNPBridgeAbstractclass):
     def __init__(self, name):
         rospy.loginfo("Starting '%s'." % name)
         super(ROSPlanBridge, self).__init__("/kcl_rosplan/plan")
+        rospy.Subscriber("/kcl_rosplan/plan", CompletePlan, self.callback)
         rospy.loginfo("Done.")
+
+    def callback(self, msg):
+        self.generate_and_send_pnml(msg)
+        rospy.loginfo("Sending pnml")
 
     def parse_plan_msg(self, msg):
         plan = self.new_plan()

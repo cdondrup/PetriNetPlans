@@ -20,9 +20,6 @@ class PNPBridgeAbstractclass(object):
 
     def __init__(self, plan_topic):
         self.pub = rospy.Publisher("/planToExec", String, queue_size=10, latch=False)
-        rospy.loginfo("Waiting for topic: %s" % plan_topic)
-        t = rostopic.get_topic_class(plan_topic, True)[0]
-        rospy.loginfo("Got topic: %s" % plan_topic)
         rospy.sleep(0.1)
 
         self.restart_action = lambda:self.new_action("restart_action")
@@ -30,8 +27,6 @@ class PNPBridgeAbstractclass(object):
         self.skip_action = lambda:self.new_action("skip_action")
         self.restart_plan = lambda:self.new_action("restart_plan")
         self.fail_plan = lambda:self.new_action("fail_plan")
-
-        rospy.Subscriber(plan_topic, t, self._callback)
 
     @abstractmethod
     def parse_plan_msg(self, msg):
@@ -134,21 +129,14 @@ class PNPBridgeAbstractclass(object):
         if not isinstance(msg.execution_rules, PNPExecutionRuleArray):
             raise TypeError("Field 'execution_rules' has to be of type:", PNPExecutionRuleArray)
 
-    def _callback(self, msg):
+    def generate_and_send_pnml(self, msg):
         plan = self.parse_plan_msg(msg)
         self._check_msg_type(plan)
-#        print plan
-#        rospy.loginfo("Got plan '%s'" % plan[:-1])
-        pnml = self._generate_pnml(plan)
-        rospy.loginfo("Sending pnml")
-        self.pub.publish(pnml)
-#        print "published"
-
-    def _generate_pnml(self, plan):
         s = rospy.ServiceProxy("/pnpgen/generate_plan", PNPGeneratePlan)
         while not rospy.is_shutdown():
             try:
                 s.wait_for_service(timeout=1.)
-                return s(PNPGeneratePlanRequest(plan=plan)).pnml
+                self.pub.publish(s(PNPGeneratePlanRequest(plan=plan)).pnml)
+                return
             except rospy.ROSException:
                 rospy.logwarn("Unable to generate PNML, retrying.")
