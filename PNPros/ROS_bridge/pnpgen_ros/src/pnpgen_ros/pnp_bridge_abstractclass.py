@@ -7,16 +7,17 @@ Created on Thu Jul 28 11:06:58 2016
 
 from abc import ABCMeta, abstractmethod
 import rospy
-import rostopic
 from std_msgs.msg import String
 from pnpgen_ros.srv import PNPGeneratePlan, PNPGeneratePlanRequest
 from pnpgen_ros.msg import Plan, PNPAction, PNPActionArray, PNPExecutionRule, PNPExecutionRuleArray
+from pnp_msgs.srv import PNPCondition, PNPConditionResponse, UpdateKnowledgeBase, UpdateKnowledgeBaseResponse
 
 
 class PNPBridgeAbstractclass(object):
     __metaclass__ = ABCMeta
 
     BEFORE, DURING, AFTER = range(3)
+    UNKNOWN, FALSE, TRUE = (-1,0,1)
 
     def __init__(self, plan_topic):
         self.pub = rospy.Publisher("/planToExec", String, queue_size=10, latch=False)
@@ -28,12 +29,36 @@ class PNPBridgeAbstractclass(object):
         self.restart_plan = lambda:self.new_action("restart_plan")
         self.fail_plan = lambda:self.new_action("fail_plan")
 
+        rospy.Service("PNPConditionEval", PNPCondition, self._check_condition)
+        rospy.Service("~update_knowledgebase", UpdateKnowledgeBase, self._update_knowledgebase)
+
     @abstractmethod
     def parse_plan_msg(self, msg):
         """Parse the incoming plan.
         :return pnpgen_ros/Plan
         """
         return
+
+    @abstractmethod
+    def query_knowledgbase(self, predicate):
+        """querry the knowledge base.
+        :param predicate: The condition as a string taken from the PNP.
+        :return -1 for unknown, 0 for false, or 1 for true
+        """
+        return
+
+    def _update_knowledgebase(self, req):
+
+        return UpdateKnowledgeBaseResponse()
+
+    def _check_condition(self, req):
+        rospy.loginfo("Checking condition: '%s'" % req.cond)
+        res = self.query_knowledgbase(req.cond)
+        if not isinstance(res, int):
+            raise TypeError("The result of 'querry_knowledgebase' has to be of type:", int)
+        if not res in (self.UNKNOWN, self.FALSE, self.TRUE):
+            raise TypeError("The result of 'querry_knowledgebase' has to be: -1 (unknown), 0 (false), or 1(true).")
+        return PNPConditionResponse()
 
     def new_plan(self, actions=None, execution_rules=None):
         if actions != None:

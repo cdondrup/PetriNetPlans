@@ -13,8 +13,9 @@ from actionlib import ActionServer, ActionClient
 from actionlib_msgs.msg import GoalStatus
 from pnp_msgs.srv import PNPRegisterServer, PNPRegisterServerResponse
 from pnp_msgs.srv import PNPUnregisterServer, PNPUnregisterServerResponse
-from pnp_msgs.srv import PNPCondition, PNPConditionResponse
-from pnp_msgs.msg import PNPAction, PNPFeedback, PNPResult
+from pnp_msgs.srv import UpdateKnowledgeBase
+from pnp_msgs.msg import PNPAction, PNPFeedback, PNPResult, ActionResult
+import pnp_plugin_server.utils as ut
 from threading import Thread
 
 
@@ -44,9 +45,6 @@ class PNPPluginServer(object):
         )
         rospy.Service("~register_server", PNPRegisterServer, self.__register_callback)
         rospy.Service("~unregister_server", PNPUnregisterServer, self.__unregister_callback)
-        rospy.Service('PNPConditionEval',
-                  PNPCondition,
-                  self._condition_eval_cb)
         self._as.start()
         rospy.loginfo("%s started" % name)
 
@@ -61,13 +59,6 @@ class PNPPluginServer(object):
         # remove "Goal" string from action type
         assert("Goal" in topic_type)
         return roslib.message.get_message_class(topic_type.replace('Goal',''))
-
-    def _condition_eval_cb(self, req):
-        print "+++++++++", req
-        try:
-            return PNPConditionResponse(self.__conditions[req.cond])
-        except KeyError:
-            return PNPConditionResponse(False)
 
     def __register_callback(self, req):
         name = req.action_name.replace('/','')
@@ -117,7 +108,6 @@ class PNPPluginServer(object):
 #        print feedback
 
     def _cancel(self, gh):
-        print "####### CANCEL"
         g = gh.get_goal()
         if g.id in self.__goals:
             if gh.status_tracker.status.status in (GoalStatus.ACTIVE, GoalStatus.PENDING):
@@ -150,6 +140,19 @@ class PNPPluginServer(object):
                 print "Set failed:", gh
                 gh.set_succeeded(PNPResult(result='FAILED'), 'FAILED')
         else:
+            result = self.__goals[g.id][G].get_result()
+            if result != None:
+                cond = []
+                truth_value = []
+                for slot in result.__slots__:
+                    res = getattr(result,slot)
+                    res = [res] if not isinstance(res, list) else res
+                    for r in res:
+                        if not isinstance(r, ActionResult):
+                            raise TypeError("Action server result has to be of type:", ActionResult)
+                        cond.append(r.cond)
+                        truth_value.append(r.truth_value)
+                self._update_knowledgebase(cond, truth_value)
             if gh.status_tracker.status.status in (GoalStatus.ACTIVE, GoalStatus.PENDING):
                 print "Set suceeded:", gh
                 gh.set_succeeded(PNPResult(result='OK'), 'OK')
@@ -158,6 +161,17 @@ class PNPPluginServer(object):
                 del self.__goals[g.id]
             except KeyError as e:
                 pass
+
+    def _update_knowledgebase(self, cond, truth_value):
+        s = rospy.ServiceProxy(ut.find_service_by_type(UpdateKnowledgeBase._type), UpdateKnowledgeBase)
+        try:
+            s.wait_for_service(timeout=1.)
+            cond = [cond] if not isinstance(cond, list) else cond
+            truth_value = [truth_value] if not isinstance(truth_value, list) else truth_value
+            for c, t in zip(cond, truth_value):
+                s(c, t)
+        except rospy.ROSException:
+            rospy.logwarn("Something went wrong when trying to update the knowledgebase.")
 
 
 if __name__ == "__main__":

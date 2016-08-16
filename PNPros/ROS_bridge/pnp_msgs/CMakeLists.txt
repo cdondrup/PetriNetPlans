@@ -49,6 +49,7 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    Action.msg
    ActionFinished.msg
+   ActionResult.msg
  )
 
 ## Generate services in the 'srv' folder
@@ -62,6 +63,7 @@ find_package(catkin REQUIRED COMPONENTS
    PNPSetVariableValue.srv
    PNPRegisterServer.srv
    PNPUnregisterServer.srv
+   UpdateKnowledgeBase.srv
  )
 
 ## Generate actions in the 'action' folder

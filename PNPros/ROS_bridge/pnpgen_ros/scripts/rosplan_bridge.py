@@ -9,6 +9,8 @@ Created on Thu Jul 28 11:06:58 2016
 import rospy
 from pnpgen_ros.pnp_bridge_abstractclass import PNPBridgeAbstractclass
 from rosplan_dispatch_msgs.msg import CompletePlan
+from rosplan_knowledge_msgs.srv import KnowledgeUpdateService, KnowledgeUpdateServiceRequest
+from rosplan_knowledge_msgs.srv import KnowledgeQueryService, KnowledgeUpdateQueryRequest
 
 
 class ROSPlanBridge(PNPBridgeAbstractclass):
