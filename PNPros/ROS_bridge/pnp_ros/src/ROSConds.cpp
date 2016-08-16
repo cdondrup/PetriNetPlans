@@ -12,7 +12,9 @@ namespace pnpros
 		ROS_INFO("Setting service client for PNPConditionEval.");
 		
         client = n.serviceClient<pnp_msgs::PNPCondition>("PNPConditionEval");
-		
+		ROS_INFO("Waiting for service 'PNPConditionEval'.");
+        client.waitForExistence();
+        
         pnp_msgs::PNPCondition srv;
 		srv.request.cond = string("hello");
 		
