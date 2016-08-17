@@ -7,34 +7,42 @@ Created on Tue Aug 16 14:55:26 2016
 """
 
 import rospy
-from pnp_msgs.srv import PNPCondition, PNPConditionResponse, UpdateKnowledgeBase, UpdateKnowledgeBaseResponse
+from pnp_knowledgebase.pnp_knowledgebase_abstractclass import PNPKnowledgebaseAbstractclass
 import yaml
 
 
-class MinimalKnowledgebase(object):
+class MinimalKnowledgebase(PNPKnowledgebaseAbstractclass):
     def __init__(self, name):
         rospy.loginfo("Starting '%s'." % name)
-        self.knowledgebase = {"hello": 1}
         kb_file = rospy.get_param("~kb_file", default="")
-        if kb_file != "":
-            for k, v in self.load_yaml(kb_file):
-                self.knowledgebase[k] = v
-        rospy.Service("PNPConditionEval", PNPCondition, self._condition_eval_cb)
-        rospy.Service("~update_knowledgebase", UpdateKnowledgeBase, self._update_knowledgebase)
+        self.knowledgebase = self.load_yaml(kb_file) if kb_file != "" else {}
+        super(MinimalKnowledgebase, self).__init__()
         rospy.loginfo("Done.")
 
     def load_yaml(self, f):
         with open(f, 'r') as y:
             return yaml.load(y)
 
-    def _condition_eval_cb(self, req):
-        rospy.loginfo("Evaluating '%s': %s" % (req.cond, str(self.knowledgebase[req.cond])))
-        return PNPConditionResponse(self.knowledgebase[req.cond] if req.cond in self.knowledgebase else -1)
+    def query_knowledgbase(self, predicate):
+        """querry the knowledge base.
+        :param predicate: The condition as a string taken from the PNP.
+        :return (int) -1 (unknown), 0 (false), or 1 (true)
+        """
+        try:
+            res = self.knowledgebase[predicate]
+        except KeyError:
+            res = -1
+        finally:
+            rospy.loginfo("Evaluating '%s': %s" % (predicate, str(res)))
+            return res
 
-    def _update_knowledgebase(self, req):
-        self.knowledgebase[req.cond] = req.truth_value
+    def update_knowledgebase(self, predicate, truth_value):
+        """update the knowledge base.
+        :param predicate: The condition as a string taken from the PNP.
+        :param truth_value: (int) -1 (unknown), 0 (false), 1 (true)
+        """
+        self.knowledgebase[predicate] = truth_value
         print self.knowledgebase
-        return UpdateKnowledgeBaseResponse()
 
 if __name__ == "__main__":
     rospy.init_node("minimal_knowledgebase")
