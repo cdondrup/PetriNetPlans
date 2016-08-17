@@ -29,8 +29,8 @@ namespace pnpgen_ros {
         
         inline std::vector<Place*> addBinarySensingAction(std::string name, std::string condition, Place* p) {
             std::vector<std::string> o;
-            o.push_back(condition);
             o.push_back("(not "+condition+")");
+            o.push_back(condition);
             return pnpgen->addSensingAction(name, p, o);
         }
 
