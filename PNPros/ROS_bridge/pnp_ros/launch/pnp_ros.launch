@@ -1,5 +1,5 @@
 <launch>
-  <arg name="current_plan" default="sensing" />
+  <arg name="current_plan" default="stop" />
   <arg name="plan_folder" default="$(find pnp_ros)/plans" />
   <arg name="use_java_connection" default="false" />
 <!--   <arg name="working_dir" default="/tmp" />

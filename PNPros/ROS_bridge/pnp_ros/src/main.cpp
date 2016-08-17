@@ -33,7 +33,7 @@ std::string planToExec = "";
 void planToExecuteCallback(const std_msgs::String::ConstPtr& msg)
 {
   planToExec = msg->data;
-  ROS_INFO("Plan received from topic %s. Executing plan %s ... ", TOPIC_PLANTOEXEC, planToExec.c_str());
+  ROS_INFO("Plan received from topic %s. Executing plan.", TOPIC_PLANTOEXEC);
   
 }
 
@@ -149,7 +149,7 @@ int main(int argc, char** argv)
 			{
 				//if (i % 100 == 0)
 				{
-					cerr << "\033[22;37;1mExecuting plan: " << planName << "\033[0m" << endl;
+					cerr << "\033[22;37;1mExecuting plan\033[0m" << endl;
 					cerr << "\033[22;33;1mExperiment " << (i + 1) << " out of " << totalExperiments << "\033[0m" << endl;
 				}
 				
@@ -222,7 +222,7 @@ int main(int argc, char** argv)
 
                 currentPlanName = planName;
 			  
-                cerr << "\033[22;31;1mExecuting plan: " << planName << "\033[0m  autorestart: " << autorestart <<
+                cerr << "\033[22;31;1mExecuting plan\033[0m  autorestart: " << autorestart <<
                 " use_java_connection: " << use_java_connection << endl;
 
                 PnpExecuter<PnpPlan> *executor = NULL;
