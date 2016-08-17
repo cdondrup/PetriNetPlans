@@ -51,7 +51,7 @@ def unregister_plugin_client(name):
         s.wait_for_service(timeout=1.)
         s(name)
     except rospy.ROSException:
-        rospy.logwarn("Unregeistreing unsuccessful. '%s' might still be registered with server." % name)
+        rospy.logwarn("Unregistering unsuccessful. '%s' might still be registered with server." % name)
 
 def register_plugin_client(name):
     s = rospy.ServiceProxy(find_service_by_type(PNPRegisterServer._type), PNPRegisterServer)
