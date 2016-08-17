@@ -1,0 +1,19 @@
+{
+  "action_sequence":
+    [
+      {"concurrent_actions":
+        [
+          {"name": "goto", "parameters": ["close", "far"], "duration": 5}
+        ]
+      },
+      {"concurrent_actions":
+        [
+          {"name": "say", "parameters": ["hello", "close"], "duration": 2}
+        ]
+      }
+    ],
+  "execution_rules":
+    [
+      {"timing": 2, "action": "goto", "condition": "(not robot_at_close)", "recovery": [{"name": "restart_action", "parameters": [], "duration": 0}]}
+    ]
+}
