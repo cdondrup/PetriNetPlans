@@ -63,7 +63,7 @@ namespace pnpgen_ros {
                         // Add a sensing action with two outcomes: user specified | 'not' user specified
                         std::vector<Place*> res = addBinarySensingAction("before"+num_to_str<int>(cnt)+action->name, er->condition, p);
                         p = res[0]; // Success place
-                        Place *re_p = res[1]; re_p->setX(start->getX()); re_p->setY(re_p->getY()+y);
+                        Place *re_p = res[1]; re_p->setX(start->getX()); re_p->setY(re_p->getY()+(y*(cnt+1)));
                         for(std::vector<PNPAction>::const_iterator re = er->recovery.pnp_action_array.begin();
                             re != er->recovery.pnp_action_array.end(); ++re) {
                             // Error handling of specific keywords
@@ -109,7 +109,7 @@ namespace pnpgen_ros {
                         // Add a sensing action with two outcomes: user specified | 'not' user specified
                         std::vector<Place*> res = addBinarySensingAction("after"+num_to_str<int>(cnt)+action->name, er->condition, p);
                         p = res[0]; // Success place
-                        Place *re_p = res[1]; re_p->setX(start->getX()); re_p->setY(re_p->getY()+y);
+                        Place *re_p = res[1]; re_p->setX(start->getX()); re_p->setY(re_p->getY()+(y*(cnt+1)));
                         for(std::vector<PNPAction>::const_iterator re = er->recovery.pnp_action_array.begin();
                             re != er->recovery.pnp_action_array.end(); ++re) {
                             // Error handling of specific keywords
