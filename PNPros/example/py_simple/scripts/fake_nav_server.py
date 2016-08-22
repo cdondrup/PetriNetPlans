@@ -29,8 +29,8 @@ class NavServer(object):
         rospy.sleep(2.0)
         rospy.loginfo("robot at '%s'" % goal.to)
         res = FakeNavResult()
-        res.result.append(ActionResult(cond="robot_at_"+goal.from_, truth_value=ActionResult.FALSE))
-        res.result.append(ActionResult(cond="robot_at_"+goal.to, truth_value=ActionResult.TRUE))
+        res.result.append(ActionResult(cond="robot_at__"+goal.from_, truth_value=ActionResult.FALSE))
+        res.result.append(ActionResult(cond="robot_at__"+goal.to, truth_value=ActionResult.TRUE))
         self._ps.set_succeeded(res)
 
 if __name__ == "__main__":

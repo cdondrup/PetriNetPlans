@@ -29,7 +29,7 @@ class SayServer(object):
         rospy.sleep(2.0)
         rospy.loginfo("said '%s'" % goal.text)
         res = FakeSayResult()
-        res.result.append(ActionResult(cond="said_"+goal.text, truth_value=ActionResult.TRUE))
+        res.result.append(ActionResult(cond="said__"+goal.text, truth_value=ActionResult.TRUE))
         self._ps.set_succeeded(res)
 
 if __name__ == "__main__":
