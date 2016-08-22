@@ -135,7 +135,7 @@ class PNPPluginServer(object):
             while self.__goals[g.id][G].get_goal_status() in (GoalStatus.ACTIVE, GoalStatus.PENDING):
                 rospy.sleep(1.)
         except KeyError as e:
-            rospy.logerr("No action with name: %s found." % e)
+            rospy.logwarn("No action with name: %s found." % e)
             if gh.status_tracker.status.status in (GoalStatus.ACTIVE, GoalStatus.PENDING):
                 print "Set failed:", gh
                 gh.set_succeeded(PNPResult(result='FAILED'), 'FAILED')
