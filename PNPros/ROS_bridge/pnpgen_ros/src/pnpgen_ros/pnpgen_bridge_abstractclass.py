@@ -18,7 +18,7 @@ class PNPGenBridgeAbstractclass(object):
     BEFORE, DURING, AFTER = range(3)
 
     def __init__(self):
-        self.pub = rospy.Publisher("/planToExec", String, queue_size=10, latch=False)
+        self.pub = rospy.Publisher("/planToExec", String, queue_size=10, latch=True)
         rospy.sleep(0.1)
 
         self.restart_action = lambda:self.new_action("restart_action")
