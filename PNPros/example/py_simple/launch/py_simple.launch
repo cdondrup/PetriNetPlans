@@ -1,0 +1,16 @@
+<launch>
+    <!-- Global paramters -->
+    <arg name="current_plan" default="stop" />
+    <arg name="plan_folder" default="$(find pnp_ros)/plans" />
+    <arg name="use_java_connection" default="false" />
+    
+    <include file="$(find pnp_ros)/launch/pnp_ros.launch">
+        <arg name="current_plan" value="$(arg current_plan)"/>
+        <arg name="plan_folder" value="$(arg plan_folder)"/>
+        <arg name="use_java_connection" value="$(arg use_java_connection)"/>
+    </include>
+
+    <node pkg="py_simple" type="fake_nav_server.py" respawn="true" name="goto" output="screen"/>
+    <node pkg="py_simple" type="fake_say_server.py" respawn="true" name="say" output="screen"/>
+
+</launch> 
