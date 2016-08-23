@@ -14,6 +14,6 @@
     ],
   "execution_rules":
     [
-      {"timing": 2, "action": "goto", "condition": "(not robot_at_close)", "recovery": [{"name": "restart_action", "parameters": [], "duration": 0}]}
+      {"timing": 2, "action": "goto", "condition": "(not robot_at__close)", "recovery": [{"name": "restart_action", "parameters": [], "duration": 0}]}
     ]
 }
