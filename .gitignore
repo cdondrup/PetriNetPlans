@@ -23,6 +23,7 @@ lib
 srv_gen
 msg_gen
 _*.py
+!__init__.py
 CMakeFiles
 CMakeCache.txt
 CMakeLists.txt.user
