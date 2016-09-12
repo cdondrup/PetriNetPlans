@@ -64,6 +64,8 @@ find_package(catkin REQUIRED COMPONENTS
    PNPRegisterServer.srv
    PNPUnregisterServer.srv
    UpdateKnowledgeBase.srv
+   PNPSuccess.srv
+   PNPFailure.srv
  )
 
 ## Generate actions in the 'action' folder

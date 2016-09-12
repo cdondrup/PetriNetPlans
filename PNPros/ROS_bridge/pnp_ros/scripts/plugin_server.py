@@ -11,9 +11,11 @@ import rostopic
 import roslib
 from actionlib import ActionServer, ActionClient
 from actionlib_msgs.msg import GoalStatus
+from std_msgs.msg import String
 from pnp_msgs.srv import PNPRegisterServer, PNPRegisterServerResponse
 from pnp_msgs.srv import PNPUnregisterServer, PNPUnregisterServerResponse
 from pnp_msgs.srv import UpdateKnowledgeBase
+from pnp_msgs.srv import PNPSuccess, PNPFailure
 from pnp_msgs.msg import PNPAction, PNPFeedback, PNPResult, ActionResult
 import pnp_plugin_server.utils as ut
 from threading import Thread
@@ -43,6 +45,7 @@ class PNPPluginServer(object):
             cancel_cb=None,
             auto_start=False
         )
+        rospy.Subscriber("/pnp_ros/currentActivePlaces", String, self.__current_places_cb)
         rospy.Service("~register_server", PNPRegisterServer, self.__register_callback)
         rospy.Service("~unregister_server", PNPUnregisterServer, self.__unregister_callback)
         self._as.start()
@@ -106,6 +109,17 @@ class PNPPluginServer(object):
     def feedback_cb(self, gh, feedback, parent_gh):
         parent_gh.publish_feedback(feedback=PNPFeedback(feedback.__str__()))
 #        print feedback
+
+    def __current_places_cb(self, msg):
+        t = PNPSuccess if msg.data == "goal" else PNPFailure if msg.data == "fail" else None
+        if t == None:
+            return
+        s = rospy.ServiceProxy(ut.find_service_by_type(t._type), t)
+        try:
+            s.wait_for_service(timeout=1.)
+            s()
+        except rospy.ROSException:
+            rospy.logwarn("Unable to notify planning system of success or failure.")
 
     def _cancel(self, gh):
         g = gh.get_goal()
