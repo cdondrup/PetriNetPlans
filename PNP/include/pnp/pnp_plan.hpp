@@ -62,18 +62,12 @@ bool PnpPlanTemplate<PnpPlaceClass, PnpTransitionClass>::isInGoalState() const
 template<typename PnpPlaceClass, typename PnpTransitionClass>
 bool PnpPlanTemplate<PnpPlaceClass, PnpTransitionClass>::isInFailState() const
 {
-	bool noFailMarking = true;
 	std::set<PnpPlace*>::iterator p_iter=PetriNet<PnpPlaceClass, PnpTransitionClass>::places.begin();
 	for(;p_iter!=PetriNet<PnpPlaceClass, PnpTransitionClass>::places.end();p_iter++) {
 		PnpPlace* p = *p_iter;
-		if (p->failMarking == -1) continue;
-		else {
-			noFailMarking = false;
-			if (p->currentMarking!=(size_t)p->failMarking) return false;
-		}
+		if (p->currentMarking) return p->failMarking == 1 ? true : false;
 	}
-	if (noFailMarking) return false;
-	else return true;
+	return false;
 }
 
 template<typename PnpPlaceClass, typename PnpTransitionClass>
