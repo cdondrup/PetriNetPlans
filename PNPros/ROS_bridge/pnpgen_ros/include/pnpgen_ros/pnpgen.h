@@ -22,7 +22,7 @@ namespace pnpgen_ros {
             for(std::vector<std::string>::const_iterator param = parameters.begin();
                 param != parameters.end(); ++param) {
                 // Create param string
-                name += "_"+(*param);
+                name += ","+(*param);
             }
             return name;
         }

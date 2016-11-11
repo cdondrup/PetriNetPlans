@@ -141,7 +141,7 @@ class PNPPluginServer(object):
         rospy.loginfo("Executing: %s" % g)
         try:
             ng = self.__servers[self.__goals[g.id][SN]][GT]()
-            for param, slot, t in zip(g.params.split('_'), ng.__slots__, ng._slot_types):
+            for param, slot, t in zip(g.params.split(','), ng.__slots__, ng._slot_types):
                 setattr(ng, slot, type(getattr(ng,slot))(param))
             print ng
 

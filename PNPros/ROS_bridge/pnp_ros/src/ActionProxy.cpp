@@ -29,7 +29,7 @@ namespace pnpros
             nms = nm.substr(k+1);
         }
 
-        k = nms.find('_');
+        k = nms.find(',');
         if (k == string::npos)
             name = nms;
         else {

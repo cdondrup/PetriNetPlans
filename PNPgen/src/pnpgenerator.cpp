@@ -293,7 +293,7 @@ Place* PNP::addTimedAction(string name, Place *p0, int timevalue, Place **p0acti
     // actions
     Place *pi2 = addPlace("X",-1); pi2->setX(tf->getX()+1); pi2->setY(tf->getY()+1);
     connect(tf,pi2);
-    stringstream ss; ss << "wait_" << timevalue;
+    stringstream ss; ss << "wait," << timevalue;
     Place *pf2 = addAction(ss.str(),pi2);
 
     // join transition
@@ -533,7 +533,7 @@ void PNPGenerator::applySocialRules() {
     while (!ASS.empty()) {
         current=ASS.top(); ASS.pop();
         string current_action_param = current.first;
-        vector<string> tk; boost::split(tk,current_action_param,boost::is_any_of("_"));
+        vector<string> tk; boost::split(tk,current_action_param,boost::is_any_of(","));
         string current_action = tk[0]; // current action (without parameters)
         Place* current_place = current.second; // init place of this action
 
@@ -678,7 +678,7 @@ void PNPGenerator::applyExecutionRules() {
     while (!ASE.empty()) {
         current=ASE.top(); ASE.pop();
         string current_action_param = current.first;
-        vector<string> tk; boost::split(tk,current_action_param,boost::is_any_of("_"));
+        vector<string> tk; boost::split(tk,current_action_param,boost::is_any_of(","));
         string current_action = tk[0]; // current action (without parameters)
         Place* current_place = current.second; // init place of this action
 
