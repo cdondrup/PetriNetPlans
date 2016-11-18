@@ -48,6 +48,7 @@ class PNPPluginServer(object):
         rospy.Subscriber("/pnp_ros/currentActivePlaces", String, self.__current_places_cb)
         rospy.Service("~register_server", PNPRegisterServer, self.__register_callback)
         rospy.Service("~unregister_server", PNPUnregisterServer, self.__unregister_callback)
+        self.__update_service = rospy.ServiceProxy(ut.find_service_by_type(UpdateKnowledgeBase._type), UpdateKnowledgeBase)
         self._as.start()
         rospy.loginfo("%s started" % name)
 
@@ -96,7 +97,7 @@ class PNPPluginServer(object):
         if g.function == START:
             gh.set_accepted()
             t = Thread(target=self._execute, args=(gh,))
-            self.__goals[g.id] = {GH: gh, SN: g.name}
+            self.__goals[g.id] = {GH: gh, SN: g.name.split("@")[0]}
             print self.__goals
             t.start()
         elif g.function in (INTERRUPT, END):
@@ -147,7 +148,7 @@ class PNPPluginServer(object):
 
             self.__goals[g.id][G] = self.__servers[self.__goals[g.id][SN]][S].send_goal(ng, feedback_cb=lambda *x: self.feedback_cb(*x, parent_gh=gh))
             while self.__goals[g.id][G].get_goal_status() in (GoalStatus.ACTIVE, GoalStatus.PENDING):
-                rospy.sleep(1.)
+                rospy.sleep(.01)
         except KeyError as e:
             rospy.logwarn("No action with name: %s found." % e)
             if gh.status_tracker.status.status in (GoalStatus.ACTIVE, GoalStatus.PENDING):
@@ -177,13 +178,12 @@ class PNPPluginServer(object):
                 pass
 
     def _update_knowledgebase(self, cond, truth_value):
-        s = rospy.ServiceProxy(ut.find_service_by_type(UpdateKnowledgeBase._type), UpdateKnowledgeBase)
         try:
-            s.wait_for_service(timeout=1.)
+            self.__update_service.wait_for_service(timeout=1.)
             cond = [cond] if not isinstance(cond, list) else cond
             truth_value = [truth_value] if not isinstance(truth_value, list) else truth_value
             for c, t in zip(cond, truth_value):
-                s(c, t)
+                self.__update_service(c, t)
         except rospy.ROSException:
             rospy.logwarn("Something went wrong when trying to update the knowledgebase.")
 
