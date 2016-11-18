@@ -31,5 +31,9 @@ def create_condition(operator, *args):
             return cond[0]
     elif len(cond) == 0:
         return "" #No empty conditions
+    elif len(cond) > 1 and operator == NOT:
+        # not can only wrap around a single predicate
+        return create_condition(AND, [create_condition(operator, c) for c in cond])
+            
 
     return "("+operator+" "+" ".join(cond)+")"
