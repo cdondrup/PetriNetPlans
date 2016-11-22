@@ -75,7 +75,6 @@ class PNPPluginServer(object):
             rospy.loginfo("Waiting for '%s' action server to start." % name)
             self.__servers[name][S].wait_for_server()
             rospy.loginfo("'%s' action server started." % name)
-            print self.__servers
             return PNPRegisterServerResponse(True)
         else:
             rospy.logwarn("'%s' already registered. Won't do anything." % name)
