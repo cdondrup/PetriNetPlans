@@ -56,16 +56,16 @@ class PNPPluginServer(object):
         topic_type = rostopic._get_topic_type("/%s/goal" % action_name)[0]
         # remove "Action" string from goal type
         assert("Action" in topic_type)
-        return roslib.message.get_message_class(topic_type.replace('Action',''))
+        return roslib.message.get_message_class(topic_type[:-10]+"Goal")
 
     def get_action_type(self, action_name):
         topic_type = rostopic._get_topic_type("/%s/goal" % action_name)[0]
         # remove "Goal" string from action type
         assert("Goal" in topic_type)
-        return roslib.message.get_message_class(topic_type.replace('Goal',''))
+        return roslib.message.get_message_class(topic_type[:-4])
 
     def __register_callback(self, req):
-        name = req.action_name.replace('/','')
+        name = req.action_name[1:] if req.action_name[0] == "/" else req.action_name
         rospy.loginfo("Registering '%s' action server" % name)
         if name not in self.__servers:
             self.__servers[name] = {
@@ -81,11 +81,10 @@ class PNPPluginServer(object):
             return PNPRegisterServerResponse(False)
 
     def __unregister_callback(self, req):
-        name = req.action_name.replace('/','')
+        name = req.action_name[1:] if req.action_name[0] == "/" else req.action_name
         rospy.loginfo("Unregistering '%s' action server" % name)
         if name in self.__servers:
             del self.__servers[name]
-            print self.__servers
             return PNPUnregisterServerResponse(True)
         else:
             rospy.logwarn("'%s' not registered. Won't do anything." % name)
