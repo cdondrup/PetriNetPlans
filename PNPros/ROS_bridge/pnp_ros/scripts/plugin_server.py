@@ -153,22 +153,28 @@ class PNPPluginServer(object):
                 print "Set failed:", gh
                 gh.set_succeeded(PNPResult(result='FAILED'), 'FAILED')
         else:
-            result = self.__goals[g.id][G].get_result()
-            if result != None:
-                cond = []
-                truth_value = []
-                for slot in result.__slots__:
-                    res = getattr(result,slot)
-                    res = [res] if not isinstance(res, list) else res
-                    for r in res:
-                        if not isinstance(r, ActionResult):
-                            raise TypeError("Action server result has to be of type:", ActionResult)
-                        cond.append(r.cond)
-                        truth_value.append(r.truth_value)
-                self._update_knowledgebase(cond, truth_value)
+            state = self.__goals[g.id][G].get_goal_status()
+            if state == GoalStatus.SUCCEEDED:
+                result = self.__goals[g.id][G].get_result()
+                if result != None:
+                    cond = []
+                    truth_value = []
+                    for slot in result.__slots__:
+                        res = getattr(result,slot)
+                        res = [res] if not isinstance(res, list) else res
+                        for r in res:
+                            if not isinstance(r, ActionResult):
+                                raise TypeError("Action server result has to be of type:", ActionResult)
+                            cond.append(r.cond)
+                            truth_value.append(r.truth_value)
+                    self._update_knowledgebase(cond, truth_value)
             if gh.status_tracker.status.status in (GoalStatus.ACTIVE, GoalStatus.PENDING):
-                print "Set suceeded:", gh
-                gh.set_succeeded(PNPResult(result='OK'), 'OK')
+                if state == GoalStatus.SUCCEEDED:
+                    print "Set suceeded:", gh
+                    gh.set_succeeded(PNPResult(result='OK'), 'OK')
+                else:
+                    print "Set failed:", gh
+                    gh.set_aborted(PNPResult(result='FAILED'), 'FAILED')
         finally:
             try:
                 del self.__goals[g.id]
