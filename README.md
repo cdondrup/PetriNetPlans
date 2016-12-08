@@ -1,42 +1,51 @@
 
-Petri Net Plans
-===============
+# Petri Net Plans
 
-This repository contains Petri Net Plans library, PNP ROS bridge and some sample applications.
+This repository contains Petri Net Plans library, PNP ROS bridge and some sample applications. This master branch contains up-to-date development, with the indigo version of PNPros.
 
-This master branch contains up-to-date development, with hydro/indigo version of PNPros.
+## How to install and run
 
-Look for ROS-groovy branch for ROS groovy version of PNPros.
+PNP requires to use `catkin_make_isolated` which results in a slightly different layout of the `build` and `devel` directories in your ros workspace. Hence, I suggest to keep this in a separate workspace for cleaner results.
 
+Possible workspace structure:
 
-How to install and run
-======================
+```
+/opt/ros -> pnp_ws -> ros_ws
+```
 
-Please follow this order.
+In the following, I will assume that you are aiming to achieve this structure on your system.
 
-1. Compile and install PNP (see PNP/README.txt)
+### Installation
 
-2. Compile and test pnp_ros and rp_action (see PNPros/README.txt)
+1. Create a new workspace: `mkdir ~/pnp_ws/src`
+2. Change into the workspace: `cd ~/pnp_ws/src`
+3. Create a catkin workspace: `ctakin_init_workspace`
+4. Clone the repository: `git clone git@protolab.aldebaran.com:mummer/petri_net_plans.git`
+5. Make sure that only the installe ROS is sourced: `source /opt/ros/indigo/setup.bash`
+6. Download dependencies: `rosdep install --from-paths petri_net_plans -y -r -n`
+7. Build the workspace: `catkin_make_isolated -C ~/pnp_ws/`
 
-These packages have been tested with Ubuntu 12.04 + ROS hydro and 
-Ubuntu 14.04 + ROS indigo.
+### Set-up your ROS environment
 
-If you encounter and problem, please contact one of the maintainers
-(e.g., iocchi@dis.uniroma1.it)
+Assuming you now have a `pnp_ws` and you also have a `ros_ws`. Make sure that your `~/.bashrc` contains the following entries in the bottom:
 
-How to use variables in PNP
-======================
+```
+source /opt/ros/indigo/setup.bash
+source ~/pnp_ws/devel_isolated/setup.bash
+source ~/ros_ws/devel/setup.bash
+```
 
-In PNP, there is the possibility to instantiate parametric plans (i.e., plans that contain variables).
+Afterwards, you will have to recompile your `~/ros_ws/` to make sure that you have a clean workspace overlay:
 
-In PNP variables are represented with a string starting with the @ character.
+```
+cd ~/ros_ws
+rm -rf build devel
+source ~/pnp_ws/devel_isolated/setup.bash
+catkin_make
+```
 
-For example, it is possible to define a plan GoTo_@X_@Y_@Theta where the three variables @X, @Y, and @Theta are instatiated at run time. 
+### Troubleshooting
 
-In order to instatiate variables, we need to create a transition with a condition containing the variables name (e.g., "start [GoTo_@X_@Y_@Theta]" where the condition is [GoTo_@X_@Y_@Theta]). 
+If you encounter and problem, please contact the maintainer
+(c.dondrup@hw.ac.uk)
 
-At this point, every time PNP receives an event of the form GoTo_instance1_instance2_instance3, it will instatiate the variables with the instances provided (in this case X=instance1, Y=instance2, Theta=instance3). 
-
-From this point on, the global variables can be used in the plan (for example in execution nodes, such as in a node called "GoTo_@X_@Y_@Theta.exec").
-
-Finally, to modify the variables' value just reinstantiate them as previously explained.
