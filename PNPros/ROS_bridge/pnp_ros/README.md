@@ -253,4 +253,4 @@ where the two functions:
         return
 ```
 
-Have to be implementd to send fedback to your planning node. They will be triggered when the PNP reaches a fail or goald state, repsectively.
+Have to be implementd to send fedback to your planning node. They will be triggered when the PNP reaches a fail or goal state, repsectively. In this example they simply print the state but using a real planner, they might trigger replanning or similar.
