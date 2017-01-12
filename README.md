@@ -23,7 +23,8 @@ In the following, I will assume that you are aiming to achieve this structure on
 4. Clone the repository: `git clone git@protolab.aldebaran.com:mummer/petri_net_plans.git`
 5. Make sure that only the installe ROS is sourced: `source /opt/ros/indigo/setup.bash`
 6. Download dependencies: `rosdep install --from-paths petri_net_plans -y -r -n`
-7. Build the workspace: `catkin_make_isolated -C ~/pnp_ws/`
+7. Install additional dependencies: `sudo apt-get install ros-indigo-occupancy-grid-utils ros-indigo-diagnostic-msgs`
+8. Build the workspace: `catkin_make_isolated -C ~/pnp_ws/`
 
 ### Set-up your ROS environment
 
@@ -46,6 +47,5 @@ catkin_make
 
 ### Troubleshooting
 
-If you encounter and problem, please contact the maintainer
+If you encounter any problems, please contact the maintainer
 (c.dondrup@hw.ac.uk)
-
