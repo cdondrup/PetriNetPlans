@@ -53,7 +53,7 @@ class TerminateInteraction(object):
         # Creating the result
         res = MyPNPResult()
         res.result.append(ActionResult(cond="my_true_predicate", truth_value=True))
-        res.result.append(ActionResult(cond="my_true_predicate", truth_value=False))
+        res.result.append(ActionResult(cond="my_false_predicate", truth_value=False))
         if self._ps.is_preempt_requested():
             self._ps.set_preempted()
         else:
@@ -96,7 +96,7 @@ As you can see, the goal can consist of any of the basic datatypes (no highlevel
 ```python
         res = MyPNPResult()
         res.result.append(ActionResult(cond="my_true_predicate", truth_value=True))
-        res.result.append(ActionResult(cond="my_true_predicate", truth_value=False))
+        res.result.append(ActionResult(cond="my_false_predicate", truth_value=False))
         if self._ps.is_preempt_requested():
             self._ps.set_preempted()
         else:
