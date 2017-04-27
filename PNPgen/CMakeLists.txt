@@ -29,6 +29,7 @@ ADD_LIBRARY(pnpgen SHARED src/pnpgenerator.cpp)
 ADD_LIBRARY(prumdp SHARED src/PRUMDP/MDP.cpp src/PRUMDP/MDPsolve.cpp src/PRUMDP/PRUplus.cpp src/PRUMDP/PRUprint.cpp
     src/PRUMDP/PRU2MDP.cpp src/PRUMDP/PRU2MDPprogress.cpp src/PRUMDP/PRU2MDPstateStore.cpp src/PRUMDP/PRUconstraint.cpp
 )
+target_compile_features(prumdp PRIVATE cxx_range_for)
 
 add_executable(pnpgen_linear src/pnpgen_linear.cpp)
 add_executable(pnpgen_policy src/pnpgen_policy.cpp)

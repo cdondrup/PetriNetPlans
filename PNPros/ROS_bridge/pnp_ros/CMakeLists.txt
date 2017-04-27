@@ -99,9 +99,10 @@ find_library(PNP_LIBRARY NAMES pnp PATHS $ENV{PNP_LIB})
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+message("PNP INCLUDE $ENV{CATKIN_GLOBAL_INCLUDE_DESTINATION}") 
 include_directories(
   include
-  $ENV{PNP_INCLUDE}
+  ${CATKIN_DEVEL_PREFIX}/../pnp/include
   ${catkin_INCLUDE_DIRS}
   ${BOOST_INCLUDE_DIRS}
   ${LIBXML2_INCLUDE_DIR}

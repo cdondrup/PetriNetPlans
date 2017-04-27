@@ -96,7 +96,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
  include_directories(include)
 include_directories(
-  $ENV{PNP_INCLUDE}
+  ${CATKIN_DEVEL_PREFIX}/../pnp/include
   ${catkin_INCLUDE_DIRS}
 )
 
