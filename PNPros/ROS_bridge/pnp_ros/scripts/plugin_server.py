@@ -130,7 +130,11 @@ class PNPPluginServer(object):
                     rospy.logerr(e)
             if g.function == INTERRUPT:
                 print "Interrupting:", g.id
-                self.__goals[g.id][GH].set_preempted(PNPResult(result='INTERRUPTED'), 'INTERRUPTED')
+                try:
+                    self.__goals[g.id][GH].set_preempted(PNPResult(result='INTERRUPTED'), 'INTERRUPTED')
+                except AttributeError:
+                    rospy.logwarn("Goal '%s' could not be interrupted" % str(g.id))
+                    self.__goals[g.id][GH].set_succeeded(PNPResult(result='OK'), 'OK')
             else:
                 print "Ending:", g.id
                 self.__goals[g.id][GH].set_succeeded(PNPResult(result='OK'), 'OK')
